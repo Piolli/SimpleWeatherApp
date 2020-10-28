@@ -49,6 +49,8 @@
 		1150455D25494A9E009D34AB /* SimpleWeatherAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SimpleWeatherAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		1150456125494A9E009D34AB /* SimpleWeatherAppUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleWeatherAppUITests.swift; sourceTree = "<group>"; };
 		1150456325494A9E009D34AB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		11CEFEA22549AE6400772A59 /* Domain */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Domain; sourceTree = "<group>"; };
+		11CEFEA62549AE6600772A59 /* DataLayer */ = {isa = PBXFileReference; lastKnownFileType = folder; path = DataLayer; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,6 +81,8 @@
 		1150453325494A9C009D34AB = {
 			isa = PBXGroup;
 			children = (
+				11CEFEA62549AE6600772A59 /* DataLayer */,
+				11CEFEA22549AE6400772A59 /* Domain */,
 				1150453E25494A9C009D34AB /* SimpleWeatherApp */,
 				1150455525494A9E009D34AB /* SimpleWeatherAppTests */,
 				1150456025494A9E009D34AB /* SimpleWeatherAppUITests */,
