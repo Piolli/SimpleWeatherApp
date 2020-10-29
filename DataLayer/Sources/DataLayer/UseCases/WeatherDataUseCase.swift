@@ -6,3 +6,12 @@
 //
 
 import Foundation
+import Domain
+
+public class WeatherDataUseCase: Domain.WeatherDataUseCase {
+    
+    public func weather(_ completion: (Result<WeatherData, AppError>) -> Void) {
+        fatalError("weather(_:) has not been implemented")
+    }
+    
+}

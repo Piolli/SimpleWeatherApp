@@ -6,3 +6,10 @@
 //
 
 import Foundation
+import Domain
+
+public final class UseCaseProvider: Domain.UseCaseProvider {
+    public func makeWeatherDataUseCase() -> Domain.WeatherDataUseCase {
+        return WeatherDataUseCase()
+    }
+}

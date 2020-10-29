@@ -8,7 +8,7 @@
 import Foundation
 
 // MARK: - WeatherData
-public struct WeatherData: Codable {
+public struct WeatherData: Codable, Equatable {
     public let weather: [Weather]
     public let main: Main
     public let cod: Int
@@ -24,7 +24,7 @@ public struct WeatherData: Codable {
 }
 
 // MARK: - Weather
-public struct Weather: Codable {
+public struct Weather: Codable, Equatable {
     public let id: Int
     public let main, weatherDescription, icon: String
 
@@ -36,7 +36,7 @@ public struct Weather: Codable {
 }
 
 // MARK: - Main
-public struct Main: Codable {
+public struct Main: Codable, Equatable {
     public let temp: Double
     public let feelsLike: Double
     public let tempMin, tempMax, pressure, humidity: Double
@@ -51,23 +51,23 @@ public struct Main: Codable {
 }
 
 // MARK: - Clouds
-public struct Clouds: Codable {
+public struct Clouds: Codable, Equatable {
     public let all: Int
 }
 
 // MARK: - Coord
-public struct Coord: Codable {
+public struct Coord: Codable, Equatable {
     public let lon, lat: Double
 }
 
 // MARK: - Sys
-public struct Sys: Codable {
+public struct Sys: Codable, Equatable {
     public let type, id: Int
     public let country: String
     public let sunrise, sunset: Int
 }
 
 // MARK: - Wind
-public struct Wind: Codable {
+public struct Wind: Codable, Equatable {
     public let speed, deg: Float
 }

@@ -9,6 +9,6 @@ import Foundation
 
 public protocol UseCaseProvider {
     
-    func makeWeatherDataUseCase() -> WeatherData
+    func makeWeatherDataUseCase() -> WeatherDataUseCase
     
 }
