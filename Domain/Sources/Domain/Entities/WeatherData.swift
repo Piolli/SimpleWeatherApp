@@ -9,24 +9,24 @@ import Foundation
 
 // MARK: - WeatherData
 public struct WeatherData: Codable {
-    let weather: [Weather]
-    let main: Main
-    let cod: Int
-    let sys: Sys
-    let coord: Coord
-    let base: String
-    let visibility: Int
-    let wind: Wind
-    let clouds: Clouds
-    let dt: Int
-    let timezone, id: Int
-    let name: String
+    public let weather: [Weather]
+    public let main: Main
+    public let cod: Int
+    public let sys: Sys
+    public let coord: Coord
+    public let base: String
+    public let visibility: Int
+    public let wind: Wind
+    public let clouds: Clouds
+    public let dt: Int
+    public let timezone, id: Int
+    public let name: String
 }
 
 // MARK: - Weather
-struct Weather: Codable {
-    let id: Int
-    let main, weatherDescription, icon: String
+public struct Weather: Codable {
+    public let id: Int
+    public let main, weatherDescription, icon: String
 
     enum CodingKeys: String, CodingKey {
         case id, main
@@ -36,10 +36,10 @@ struct Weather: Codable {
 }
 
 // MARK: - Main
-struct Main: Codable {
-    let temp: Double
-    let feelsLike: Double
-    let tempMin, tempMax, pressure, humidity: Double
+public struct Main: Codable {
+    public let temp: Double
+    public let feelsLike: Double
+    public let tempMin, tempMax, pressure, humidity: Double
 
     enum CodingKeys: String, CodingKey {
         case temp
@@ -51,23 +51,23 @@ struct Main: Codable {
 }
 
 // MARK: - Clouds
-struct Clouds: Codable {
-    let all: Int
+public struct Clouds: Codable {
+    public let all: Int
 }
 
 // MARK: - Coord
-struct Coord: Codable {
-    let lon, lat: Double
+public struct Coord: Codable {
+    public let lon, lat: Double
 }
 
 // MARK: - Sys
-struct Sys: Codable {
-    let type, id: Int
-    let country: String
-    let sunrise, sunset: Int
+public struct Sys: Codable {
+    public let type, id: Int
+    public let country: String
+    public let sunrise, sunset: Int
 }
 
 // MARK: - Wind
-struct Wind: Codable {
-    let speed, deg: Float
+public struct Wind: Codable {
+    public let speed, deg: Float
 }

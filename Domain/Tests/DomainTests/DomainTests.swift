@@ -13,6 +13,12 @@ private final class DomainTests: XCTestCase {
         let data = json.data(using: .utf8)
         XCTAssertNotNil(data)
         let weatherData = try JSONDecoder().decode(WeatherData.self, from: data!)
-        dump(weatherData)
+        
+        //test some type's members
+        XCTAssertEqual(weatherData.cod, 200)
+        XCTAssertEqual(weatherData.id, 1502026)
+        XCTAssertEqual(weatherData.main.temp, 278.15)
+        XCTAssertEqual(weatherData.name, "Krasnoyarsk")
+        
     }
 }
