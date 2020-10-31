@@ -13,19 +13,19 @@ open class Repository<T> {
         
     }
     
-    open func queryAll(_ completion: (Result<[T], AppError>) -> Void) {
+    open func queryAll(_ completion: @escaping (Result<[T], AppError>) -> Void) {
         fatalError("queryAll(_:) has not been implemented")
     }
     
-    open func query(with predicate: NSPredicate, _ completion: (Result<[T], AppError>) -> Void) {
+    open func query(with predicate: NSPredicate, variables: [String: Any], _ completion: @escaping (Result<[T], AppError>) -> Void) {
         fatalError("query(with:_:) has not been implemented")
     }
     
-    open func save(entity: T, _ completion: (Result<Void, AppError>) -> Void) {
+    open func save(entity: T, _ completion: @escaping (Result<Void, AppError>) -> Void) {
         fatalError("save(entiry:_:) has not been implemented")
     }
     
-    open func delete(entity: T, _ completion: (Result<Void, AppError>) -> Void) {
+    open func delete(entity: T, _ completion: @escaping (Result<Void, AppError>) -> Void) {
         fatalError("delete(entiry:_:) has not been implemented")
     }
     
