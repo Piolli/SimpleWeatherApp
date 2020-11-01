@@ -17,6 +17,12 @@ open class Repository<T> {
         fatalError("queryAll(_:) has not been implemented")
     }
     
+    /// Queries data from repository
+    /// - Parameters:
+    ///   - predicate: specifies format with variables and operators
+    ///   - variables: substituion values for predicate format
+    ///   - completion: result block
+    ///  For predicate call method `predicate.withSubstitutionVariables(variables)` for variables substitution
     open func query(with predicate: NSPredicate, variables: [String: Any], _ completion: @escaping (Result<[T], AppError>) -> Void) {
         fatalError("query(with:_:) has not been implemented")
     }
