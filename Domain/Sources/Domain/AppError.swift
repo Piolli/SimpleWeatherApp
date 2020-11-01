@@ -7,9 +7,16 @@
 
 import Foundation
 
-public enum AppError: Error, Equatable {
-    case networkError
-    case cityNotFoundError(String)
-    case localStorageError
+public enum AppError: Error {
+    
+    // MARK: - Network
+    case networkWith(statusCode: Int)
+    case networkWith(Error, statusCode: Int)
+    case networkDataParsing
+    
+    // MARK: - Local storage
+    case cityNotFound
+    case localStorage
     case unknown
+    
 }
