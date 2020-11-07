@@ -21,6 +21,22 @@ public struct WeatherData: Codable, Equatable {
     public let dt: Int
     public let timezone, id: Int
     public let name: String
+    
+    public init(weather: [Weather], main: Main, cod: Int, sys: Sys, coord: Coord, base: String, visibility: Int, wind: Wind, clouds: Clouds, dt: Int, timezone: Int, id: Int, name: String) {
+        self.weather = weather
+        self.main = main
+        self.cod = cod
+        self.sys = sys
+        self.coord = coord
+        self.base = base
+        self.visibility = visibility
+        self.wind = wind
+        self.clouds = clouds
+        self.dt = dt
+        self.timezone = timezone
+        self.id = id
+        self.name = name
+    }
 }
 
 // MARK: - Weather
@@ -32,6 +48,13 @@ public struct Weather: Codable, Equatable {
         case id, main
         case weatherDescription = "description"
         case icon
+    }
+    
+    public init(id: Int, main: String, weatherDescription: String, icon: String) {
+        self.id = id
+        self.main = main
+        self.weatherDescription = weatherDescription
+        self.icon = icon
     }
 }
 
@@ -48,16 +71,34 @@ public struct Main: Codable, Equatable {
         case tempMax = "temp_max"
         case pressure, humidity
     }
+    
+    public init(temp: Double, feelsLike: Double, tempMin: Double, tempMax: Double, pressure: Double, humidity: Double) {
+        self.temp = temp
+        self.feelsLike = feelsLike
+        self.tempMin = tempMin
+        self.tempMax = tempMax
+        self.pressure = pressure
+        self.humidity = humidity
+    }
 }
 
 // MARK: - Clouds
 public struct Clouds: Codable, Equatable {
     public let all: Int
+    
+    public init(all: Int) {
+        self.all = all
+    }
 }
 
 // MARK: - Coord
 public struct Coord: Codable, Equatable {
     public let lon, lat: Double
+    
+    public init(lon: Double, lat: Double) {
+        self.lon = lon
+        self.lat = lat
+    }
 }
 
 // MARK: - Sys
@@ -65,9 +106,22 @@ public struct Sys: Codable, Equatable {
     public let type, id: Int
     public let country: String
     public let sunrise, sunset: Int
+
+    public init(type: Int, id: Int, country: String, sunrise: Int, sunset: Int) {
+        self.type = type
+        self.id = id
+        self.country = country
+        self.sunrise = sunrise
+        self.sunset = sunset
+    }
 }
 
 // MARK: - Wind
 public struct Wind: Codable, Equatable {
     public let speed, deg: Float
+    
+    public init(speed: Float, deg: Float) {
+        self.speed = speed
+        self.deg = deg
+    }
 }
