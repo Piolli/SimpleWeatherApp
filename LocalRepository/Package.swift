@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "LocalRepository",
+    platforms: [.iOS(.v11), .macOS(.v10_12)],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -25,6 +26,6 @@ let package = Package(
             dependencies: ["Domain", .product(name: "RealmSwift", package: "Realm")]),
         .testTarget(
             name: "LocalRepositoryTests",
-            dependencies: ["LocalRepository", "Domain"]),
+            dependencies: ["LocalRepository", "Domain", .product(name: "RealmSwift", package: "Realm")]),
     ]
 )
