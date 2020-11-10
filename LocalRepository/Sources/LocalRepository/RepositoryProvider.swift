@@ -9,9 +9,15 @@ import Foundation
 import Domain
 import RealmSwift
 
-class RepositoryProvider: Domain.RepositoryProvider {
-    func makeRepository() -> Repository<WeatherData> {
-        let configuration = Realm.Configuration.defaultConfiguration
+public class RepositoryProvider: Domain.RepositoryProvider {
+    
+    let configuration: Realm.Configuration
+    
+    public init(configuration: Realm.Configuration = Realm.Configuration.defaultConfiguration) {
+        self.configuration = configuration
+    }
+    
+    public func makeRepository() -> Repository<WeatherData> {
         return RealmRepository(configuration: configuration)
     }
 }
