@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "DataLayer",
+    platforms: [.iOS(.v10), .macOS(.v10_12)],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
@@ -15,6 +16,8 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(path: "Domain"),
+        .package(path: "LocalRepository"),
+        .package(path: "NetworkRepository"),
         .package(name: "Realm", url: "https://github.com/realm/realm-cocoa.git", .upToNextMajor(from: "10.1.1")),
     ],
     targets: [
@@ -23,7 +26,7 @@ let package = Package(
         
         .target(
             name: "DataLayer",
-            dependencies: ["Domain", .product(name: "RealmSwift", package: "Realm")]),
+            dependencies: ["Domain", "LocalRepository", "NetworkRepository", .product(name: "RealmSwift", package: "Realm")]),
         .testTarget(
             name: "DataLayerTests",
             dependencies: ["DataLayer", "Domain", ]),
