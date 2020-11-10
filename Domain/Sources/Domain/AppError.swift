@@ -16,7 +16,11 @@ public enum AppError: Error {
     
     // MARK: - Local storage
     case cityNotFound
-    case localStorage
+    case localStorageWith(Error)
+    case localStorageIsEmpty
+    case localStorageObjectNotExisted
+    
+    // MARK: - Common
     case unknown
     
 }
