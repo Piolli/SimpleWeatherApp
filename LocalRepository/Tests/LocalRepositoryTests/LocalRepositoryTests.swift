@@ -3,11 +3,118 @@ import XCTest
 import Domain
 import RealmSwift
 
-
 final class LocalRepositoryTests: XCTestCase {
-    static var allTests = [
-        ("test_RealmRepresentable_WeatherData", test_RealmRepresentable_WeatherData),
-    ]
+    
+    var inMemoryRealmRepository: RealmRepository<WeatherData>!
+    
+    override func setUp() {
+        let config = Realm.Configuration(inMemoryIdentifier: "ram")
+        inMemoryRealmRepository = .init(configuration: config)
+    }
+    
+    override func tearDown() {
+        inMemoryRealmRepository = nil
+    }
+    
+    func test_save_entity() {
+        let exp = expectation(description: "object was saved")
+        inMemoryRealmRepository.save(entity: WeatherData.TestData.sampleObject) { (result) in
+            exp.fulfill()
+        }
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func test_save_entities() {
+        let exp = expectation(description: "object was saved")
+        exp.expectedFulfillmentCount = 10
+        
+        for i in 0..<10 {
+            let object = WeatherData.TestData.sampleObjectWith(id: i)
+            inMemoryRealmRepository.save(entity: object) { (result) in
+                switch result {
+                case .success(_):
+                    exp.fulfill()
+                case .failure(_):
+                    XCTFail("Object wasn't saved")
+                }
+            }
+        }
+        
+        wait(for: [exp], timeout: 3.0)
+    }
+    
+    func test_queryAll_entities_success() {
+        let exp = expectation(description: "objects was fetched")
+        self.test_save_entities()
+        
+        // queryAll
+        inMemoryRealmRepository.queryAll { (result) in
+            switch result {
+            case .success(let data):
+                var i = 0
+                data.forEach { (entity) in
+                    XCTAssertEqual(entity.id, i)
+                    i += 1
+                }
+                XCTAssertEqual(data.count, 10)
+                exp.fulfill()
+            case .failure(_):
+                XCTFail()
+            }
+        }
+        
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func test_queryAll_entities_failure() {
+        let exp = expectation(description: "objects wasn't fetched because local storage is empty")
+        
+        inMemoryRealmRepository.queryAll { (result) in
+            switch result {
+            case .success(_):
+                XCTFail("Local storage must be empty")
+            case .failure(let error):
+                XCTAssertTrue(error == AppError.localStorageIsEmpty)
+                exp.fulfill()
+            }
+        }
+        
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func test_delete_entity_success() {
+        let exp = expectation(description: "objects was deleted")
+        let sampleObject = WeatherData.TestData.sampleObject
+        inMemoryRealmRepository.save(entity: sampleObject, {(_) in })
+        
+        inMemoryRealmRepository.delete(entity: sampleObject) { (result) in
+            switch result {
+            case .success(_):
+                exp.fulfill()
+            case .failure(_):
+                XCTFail("Local storage doesn't have an entity")
+            }
+        }
+        
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func test_delete_entity_failure() {
+        let exp = expectation(description: "objects wasn't deleted because doesn't exist")
+        let sampleObject = WeatherData.TestData.sampleObject
+        
+        inMemoryRealmRepository.delete(entity: sampleObject) { (result) in
+            switch result {
+            case .success(_):
+                XCTFail("Local storage must be empty")
+            case .failure(let error):
+                XCTAssertTrue(error == AppError.localStorageObjectNotExisted)
+                exp.fulfill()
+            }
+        }
+        
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
 
     func test_RealmRepresentable_WeatherData() {
         let sampleObject = WeatherData.TestData.sampleObject
@@ -48,6 +155,10 @@ private extension WeatherData {
             return weatherData
         }
         
+        public static func sampleObjectWith(id: Int) -> WeatherData {
+            let object = sampleObject.asRealm()
+            object.id = id
+            return object.asDomain()
+        }
     }
 }
-
