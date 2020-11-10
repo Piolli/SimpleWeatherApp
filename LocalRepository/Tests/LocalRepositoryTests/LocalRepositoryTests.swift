@@ -8,12 +8,14 @@ final class LocalRepositoryTests: XCTestCase {
     var inMemoryRealmRepository: RealmRepository<WeatherData>!
     
     override func setUp() {
+        super.setUp()
         let config = Realm.Configuration(inMemoryIdentifier: "ram")
         inMemoryRealmRepository = .init(configuration: config)
     }
     
     override func tearDown() {
         inMemoryRealmRepository = nil
+        super.tearDown()
     }
     
     func test_save_entity() {

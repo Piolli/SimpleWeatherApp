@@ -9,6 +9,6 @@ import Foundation
 
 public protocol WeatherDataUseCase {
     
-    func weather(_ completion: (Result<WeatherData, AppError>) -> Void)
+    func weather(cityName: String, _ completion: @escaping (Result<WeatherData, AppError>) -> Void)
     
 }
