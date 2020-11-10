@@ -8,7 +8,7 @@
 import Foundation
 
 protocol DomainConvertible {
-    associatedtype DomainType
+    associatedtype DomainType: RealmRepresentable
     
     func asDomain() -> DomainType
 }
