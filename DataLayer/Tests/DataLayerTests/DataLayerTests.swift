@@ -2,11 +2,138 @@ import XCTest
 @testable import DataLayer
 import RealmSwift
 import Domain
+import LocalRepository
+import NetworkRepository
 
 final class DataLayerTests: XCTestCase {
     
+    var mockLocalRepository: Repository<WeatherData>!
+    var mockNetworkRepository: Repository<WeatherData>!
+    var weatherDataUseCase: Domain.WeatherDataUseCase!
     
+    override func setUp() {
+        super.setUp()
+        let config = Realm.Configuration(inMemoryIdentifier: "ram1")
+        mockLocalRepository = LocalRepository.RepositoryProvider(configuration: config).makeRepository()
+        mockNetworkRepository = MockNetworkRepository()
+        weatherDataUseCase = DataLayer.WeatherDataUseCase(networkRepository: mockNetworkRepository, localRepository: mockLocalRepository)
+    }
     
+    override func tearDown() {
+        mockLocalRepository = nil
+        mockNetworkRepository = nil
+        weatherDataUseCase = nil
+        super.tearDown()
+    }
+    
+    // MARK: - Tests cases:
+    // 1. No local -> Network
+    // 2. Local -> No network
+    // 3. No local -> No network
+    // 4. Local -> Network
+    func test_WeatherUseCase_EmptyLocalStorage_NetworkConnection_success() {
+        let exp = expectation(description: "WeatherData was loaded")
+        let sampleObject = WeatherData.TestData.sampleObject
+        mockNetwork(with: .success([sampleObject]))
+        weatherDataUseCase.weather(cityName: "Krasnoyarsk") { (result) in
+            switch result {
+            case .success(let weatherData):
+                XCTAssertEqual(weatherData, sampleObject)
+                exp.fulfill()
+            case .failure(_):
+                XCTFail("Network repository contains WeatherData object")
+            }
+        }
+        
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func test_WeatherUseCase_LocalStorage_NoNetworkConnection_success() {
+        // save one sample object to local storage
+        self.test_WeatherUseCase_EmptyLocalStorage_NetworkConnection_success()
+        let exp = expectation(description: "WeatherData was loaded")
+        let sampleObject = WeatherData.TestData.sampleObject
+        mockNetwork(with: .failure(.networkWith(statusCode: 404)))
+        
+        weatherDataUseCase.weather(cityName: "Krasnoyarsk") { (result) in
+            switch result {
+            case .success(let weatherData):
+                XCTAssertEqual(weatherData, sampleObject)
+                exp.fulfill()
+            case .failure(_):
+                XCTFail("Network repository contains WeatherData object")
+            }
+        }
+        
+        wait(for: [exp], timeout: 3.0)
+    }
+    
+    func test_WeatherUseCase_EmptyLocalStorage_NoNetworkConnection_failure() {
+        let exp = expectation(description: "WeatherData was loaded")
+        mockNetwork(with: .failure(.networkWith(statusCode: 404)))
+        weatherDataUseCase.weather(cityName: "Krasnoyarsk") { (result) in
+            switch result {
+            case .success(let data):
+                dump(data)
+                XCTFail("Network repository and local repository don't contain any objects")
+            case .failure(let error):
+                XCTAssertTrue(error == AppError.networkWith(statusCode: 404))
+                exp.fulfill()
+            }
+        }
+        
+        waitForExpectations(timeout: 3.0, handler: nil)
+    }
+    
+    func test_WeatherUseCase_LocalStorage_NetworkConnection_success() {
+        // save one sample object to local storage
+        self.test_WeatherUseCase_EmptyLocalStorage_NetworkConnection_success()
+        let sampleObject = WeatherData.TestData.sampleObject
+        let newDataSampleObject = WeatherData.TestData.emptyObjectWith(id: sampleObject.id, cityName: "Krasnoyarsk")
+        mockNetwork(with: .success([newDataSampleObject]))
+        
+        let exp = expectation(description: "WeatherData from LocalStorage (load in background new data)")
+        weatherDataUseCase.weather(cityName: "Krasnoyarsk") { (result) in
+            switch result {
+            case .success(let weatherData):
+                XCTAssertEqual(weatherData, sampleObject)
+                exp.fulfill()
+            case .failure(_):
+                XCTFail("Network repository contains WeatherData object")
+            }
+        }
+        wait(for: [exp], timeout: 3.0)
+        
+        let exp1 = expectation(description: "WeatherData from Local Storage (auto updated weather data)")
+        weatherDataUseCase.weather(cityName: "Krasnoyarsk") { (result) in
+            switch result {
+            case .success(let weatherData):
+                XCTAssertEqual(weatherData, newDataSampleObject)
+                exp1.fulfill()
+            case .failure(_):
+                XCTFail("Network repository contains WeatherData object")
+            }
+        }
+        
+        wait(for: [exp1], timeout: 3.0)
+    }
+    
+    func mockNetwork(with result: Result<[WeatherData], AppError>) {
+        (mockNetworkRepository as! MockNetworkRepository).result = result
+    }
+    
+}
+
+class MockNetworkRepository<T>: Repository<T> {
+    var result: Result<[T], AppError>?
+    
+    init(result: Result<[T], AppError>? = nil) {
+        self.result = result
+    }
+    
+    override func query(with predicate: NSPredicate, variables: [String : Any], _ completion: @escaping (Result<[T], AppError>) -> Void) {
+        completion(result!)
+    }
 }
 
 // MARK: - Sample WeatherData
@@ -23,6 +150,10 @@ private extension WeatherData {
             let data = sampleJSON.data(using: .utf8)
             let weatherData = try! JSONDecoder().decode(WeatherData.self, from: data!)
             return weatherData
+        }
+        
+        public static func emptyObjectWith(id: Int, cityName: String) -> WeatherData {
+            .init(weather: [], main: .init(temp: 0, feelsLike: 0, tempMin: 0, tempMax: 0, pressure: 0, humidity: 0), cod: 0, sys: .init(type: 0, id: 0, country: "", sunrise: 0, sunset: 0), coord: .init(lon: 0, lat: 0), base: "", visibility: 0, wind: .init(speed: 0, deg: 0), clouds: .init(all: 0), dt: 0, timezone: 0, id: id, name: cityName)
         }
     
     }
