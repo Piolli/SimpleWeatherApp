@@ -3,13 +3,16 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1121C0F5255BEF0200A10099 /* Domain in Frameworks */ = {isa = PBXBuildFile; productRef = 1121C0F4255BEF0200A10099 /* Domain */; };
+		1121C0F7255BEF0800A10099 /* DataLayer in Frameworks */ = {isa = PBXBuildFile; productRef = 1121C0F6255BEF0800A10099 /* DataLayer */; };
+		1121C0FD255D569D00A10099 /* CitiesListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1121C0FC255D569D00A10099 /* CitiesListViewController.swift */; };
+		1121C105255D5D9000A10099 /* CitiesListPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1121C104255D5D9000A10099 /* CitiesListPresenter.swift */; };
 		1150454025494A9C009D34AB /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1150453F25494A9C009D34AB /* AppDelegate.swift */; };
 		1150454225494A9C009D34AB /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1150454125494A9C009D34AB /* SceneDelegate.swift */; };
-		1150454425494A9C009D34AB /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1150454325494A9C009D34AB /* ViewController.swift */; };
 		1150454725494A9C009D34AB /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1150454525494A9C009D34AB /* Main.storyboard */; };
 		1150454925494A9E009D34AB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1150454825494A9E009D34AB /* Assets.xcassets */; };
 		1150454C25494A9E009D34AB /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1150454A25494A9E009D34AB /* LaunchScreen.storyboard */; };
@@ -35,11 +38,12 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1121C0FC255D569D00A10099 /* CitiesListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitiesListViewController.swift; sourceTree = "<group>"; };
+		1121C104255D5D9000A10099 /* CitiesListPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CitiesListPresenter.swift; sourceTree = "<group>"; };
 		11437495254C4CD70080102A /* NetworkRepository */ = {isa = PBXFileReference; lastKnownFileType = folder; path = NetworkRepository; sourceTree = "<group>"; };
 		1150453C25494A9C009D34AB /* SimpleWeatherApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimpleWeatherApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1150453F25494A9C009D34AB /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1150454125494A9C009D34AB /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		1150454325494A9C009D34AB /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		1150454625494A9C009D34AB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		1150454825494A9E009D34AB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1150454B25494A9E009D34AB /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -60,6 +64,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1121C0F7255BEF0800A10099 /* DataLayer in Frameworks */,
+				1121C0F5255BEF0200A10099 /* Domain in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +86,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1121C0F3255BEF0200A10099 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		1121C0FB255D565B00A10099 /* CitiesList */ = {
+			isa = PBXGroup;
+			children = (
+				1121C0FC255D569D00A10099 /* CitiesListViewController.swift */,
+				1121C104255D5D9000A10099 /* CitiesListPresenter.swift */,
+			);
+			path = CitiesList;
+			sourceTree = "<group>";
+		};
 		1150453325494A9C009D34AB = {
 			isa = PBXGroup;
 			children = (
@@ -91,6 +113,7 @@
 				1150455525494A9E009D34AB /* SimpleWeatherAppTests */,
 				1150456025494A9E009D34AB /* SimpleWeatherAppUITests */,
 				1150453D25494A9C009D34AB /* Products */,
+				1121C0F3255BEF0200A10099 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -107,9 +130,9 @@
 		1150453E25494A9C009D34AB /* SimpleWeatherApp */ = {
 			isa = PBXGroup;
 			children = (
+				1121C0FB255D565B00A10099 /* CitiesList */,
 				1150453F25494A9C009D34AB /* AppDelegate.swift */,
 				1150454125494A9C009D34AB /* SceneDelegate.swift */,
-				1150454325494A9C009D34AB /* ViewController.swift */,
 				1150454525494A9C009D34AB /* Main.storyboard */,
 				1150454825494A9E009D34AB /* Assets.xcassets */,
 				1150454A25494A9E009D34AB /* LaunchScreen.storyboard */,
@@ -152,6 +175,10 @@
 			dependencies = (
 			);
 			name = SimpleWeatherApp;
+			packageProductDependencies = (
+				1121C0F4255BEF0200A10099 /* Domain */,
+				1121C0F6255BEF0800A10099 /* DataLayer */,
+			);
 			productName = SimpleWeatherApp;
 			productReference = 1150453C25494A9C009D34AB /* SimpleWeatherApp.app */;
 			productType = "com.apple.product-type.application";
@@ -266,7 +293,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1150454425494A9C009D34AB /* ViewController.swift in Sources */,
+				1121C105255D5D9000A10099 /* CitiesListPresenter.swift in Sources */,
+				1121C0FD255D569D00A10099 /* CitiesListViewController.swift in Sources */,
 				1150454025494A9C009D34AB /* AppDelegate.swift in Sources */,
 				1150454225494A9C009D34AB /* SceneDelegate.swift in Sources */,
 			);
@@ -603,6 +631,17 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1121C0F4255BEF0200A10099 /* Domain */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Domain;
+		};
+		1121C0F6255BEF0800A10099 /* DataLayer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DataLayer;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1150453425494A9C009D34AB /* Project object */;
 }
