@@ -40,6 +40,10 @@ public class WeatherDataUseCase: Domain.WeatherDataUseCase {
         }
     }
     
+    public func localStorageWeather(completion: @escaping (Result<[WeatherData], AppError>) -> Void) {
+        localRepository.queryAll(completion)
+    }
+    
     private func updateWeatherDataInBackground(predicate: NSPredicate, input: [String: Any], cityName: String) {
         fetchFromNetworkRepository(predicate: predicate, input: input, cityName: cityName) { _ in }
     }

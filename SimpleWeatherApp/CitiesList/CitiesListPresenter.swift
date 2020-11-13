@@ -13,6 +13,10 @@ class MockUseCase: Domain.WeatherDataUseCase {
         completion(.success(emptyObjectWith(id: 0, cityName: "Krasnoyarsk")))
     }
     
+    func localStorageWeather(completion: @escaping (Result<[WeatherData], AppError>) -> Void) {
+        completion(.success(allLocalStorageWeatherData()))
+    }
+    
     func allLocalStorageWeatherData() -> [WeatherData] {
         return [
             emptyObjectWith(id: 0, cityName: "Krasnoyarsk"),
@@ -38,8 +42,14 @@ class CitiesListPresenter {
     
     func loadLocalStorageCities() {
         // add allLocalStorageWeatherData() to WeatherDataUseCase
-        let data = (useCase as! MockUseCase).allLocalStorageWeatherData()
-        delegate.showCities(data)
+        useCase.localStorageWeather { (result) in
+            switch result {
+            case .success(let citiesWithWeathers):
+                self.delegate.showCities(citiesWithWeathers)
+            case .failure(let error):
+                self.delegate.showError(error)
+            }
+        }
     }
     
     func loadCity(_ cityName: String) {

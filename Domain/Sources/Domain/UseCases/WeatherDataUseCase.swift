@@ -11,4 +11,6 @@ public protocol WeatherDataUseCase {
     
     func weather(cityName: String, _ completion: @escaping (Result<WeatherData, AppError>) -> Void)
     
+    func localStorageWeather(completion: @escaping (Result<[WeatherData], AppError>) -> Void)
+    
 }
