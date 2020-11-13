@@ -56,7 +56,10 @@ class CitiesListViewController: UIViewController {
 extension CitiesListViewController: CitiesListViewDelegate {
     
     func showError(_ error: AppError) {
-        //show dialog with error message
+        let dialog = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
+        dialog.addAction(okAction)
+        present(dialog, animated: true, completion: nil)
     }
     
     func showCities(_ cities: [WeatherData]) {
