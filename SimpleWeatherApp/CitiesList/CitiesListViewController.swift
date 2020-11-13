@@ -17,6 +17,7 @@ protocol CitiesListViewDelegate: class {
 
 class CitiesListViewController: UIViewController {
     let cellIdentifier = "cell"
+    let weatherDetailsIdentifier = "weatherDetails"
     var weatherDataList: [Domain.WeatherData] = []
     var presenter: CitiesListPresenter!
 
@@ -49,6 +50,14 @@ class CitiesListViewController: UIViewController {
         dialog.addAction(cancelAction)
         dialog.addAction(loadAction)
         present(dialog, animated: true, completion: nil)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == weatherDetailsIdentifier {
+            guard let viewController = segue.destination as? WeatherDetailsViewController, let indexPath = tableView.indexPathForSelectedRow else { return }
+            let weatherData = weatherDataList[indexPath.row]
+            viewController.weatherData = weatherData
+        }
     }
 }
 
@@ -86,11 +95,15 @@ extension CitiesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
         cell.textLabel?.text = "\(weatherDataList[indexPath.row].name) - \(weatherDataList[indexPath.row].id)"
+        cell.accessoryType = .disclosureIndicator
         return cell
     }
 }
 
 // MARK: - UITableViewDelegate
 extension CitiesListViewController: UITableViewDelegate {
-    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: weatherDetailsIdentifier, sender: nil)
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
 }
