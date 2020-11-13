@@ -7,6 +7,7 @@
 
 import UIKit
 import Domain
+import DataLayer
 
 protocol CitiesListViewDelegate: class {
     func showCities(_ cities: [WeatherData])
@@ -27,7 +28,8 @@ class CitiesListViewController: UIViewController {
         tableView.delegate = self
         tableView.dataSource = self
         ///#Add from DI container
-        presenter = CitiesListPresenter(delegate: self, useCase: MockUseCase())
+        let useCase = DataLayer.UseCaseProvider().makeWeatherDataUseCase()
+        presenter = CitiesListPresenter(delegate: self, useCase: useCase)
         presenter.loadLocalStorageCities()
     }
 

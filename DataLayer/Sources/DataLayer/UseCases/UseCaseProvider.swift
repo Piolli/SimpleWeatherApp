@@ -9,6 +9,11 @@ import Foundation
 import Domain
 
 public final class UseCaseProvider: Domain.UseCaseProvider {
+    
+    public init() {
+        
+    }
+    
     public func makeWeatherDataUseCase() -> Domain.WeatherDataUseCase {
         return WeatherDataUseCase()
     }

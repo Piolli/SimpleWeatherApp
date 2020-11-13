@@ -22,7 +22,7 @@ public class WeatherDataUseCase: Domain.WeatherDataUseCase {
     
     public func weather(cityName: String, _ completion: @escaping (Result<WeatherData, AppError>) -> Void) {
         let predicate = NSPredicate(format: "name == $name")
-        let input = ["name": "Krasnoyarsk"]
+        let input = ["name": cityName]
         localRepository.query(with: predicate, variables: input) { [weak self] (result) in
             guard let self = self else {
                 completion(.failure(.unknown))
