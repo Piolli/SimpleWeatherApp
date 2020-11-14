@@ -24,7 +24,7 @@ class CitiesListPresenter {
                 case .success(let citiesWithWeathers):
                     self.delegate.showCities(citiesWithWeathers)
                 case .failure(let error):
-                    self.delegate.showError(error)
+                    print("Error while loading local storage cities: \(error.localizedDescription)")
                 }
             }
         }
