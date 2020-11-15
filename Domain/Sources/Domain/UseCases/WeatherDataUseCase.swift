@@ -13,4 +13,6 @@ public protocol WeatherDataUseCase {
     
     func localStorageWeather(completion: @escaping (Result<[WeatherData], AppError>) -> Void)
     
+    func updateAllWeatherData(completion: @escaping (Result<Void, AppError>) -> Void)
+    
 }

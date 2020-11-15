@@ -118,6 +118,58 @@ final class DataLayerTests: XCTestCase {
         wait(for: [exp1], timeout: 3.0)
     }
     
+    func test_WeatherUseCase_updateAllWeatherData_LocalStorage_NoNetworkConnection() {
+        // save one sample object to local storage
+        let exp = expectation(description: "WeatherData was loaded")
+        let localObjects = [
+            WeatherData.TestData.emptyObjectWith(id: 0, cityName: "Krasnoyarsk"),
+            WeatherData.TestData.emptyObjectWith(id: 1, cityName: "Belgium"),
+            WeatherData.TestData.emptyObjectWith(id: 2, cityName: "NY"),
+        ]
+        localObjects.forEach { (weatherData) in
+            mockLocalRepository.save(entity: weatherData, {_ in})
+        }
+        mockNetwork(with: .failure(.networkWith(statusCode: 404)))
+        
+        weatherDataUseCase.updateAllWeatherData { (result) in
+            switch result {
+            case .success(_):
+                break
+            case .failure(_):
+                exp.fulfill()
+            }
+        }
+        
+        wait(for: [exp], timeout: 3.0)
+    }
+    
+    func test_WeatherUseCase_updateAllWeatherData_LocalStorage_NetworkConnection() {
+        let exp = expectation(description: "WeatherData was loaded")
+        mockLocalRepository.save(entity: WeatherData.TestData.emptyObjectWith(id: 0, cityName: "Belgium", dt: 0), {_ in})
+
+        let networkObject = [WeatherData.TestData.emptyObjectWith(id: 0, cityName: "Belgium", dt: 199)]
+        mockNetwork(with: .success(networkObject))
+        
+        weatherDataUseCase.updateAllWeatherData { (result) in
+            switch result {
+            case .success(_):
+                self.weatherDataUseCase.localStorageWeather { (result) in
+                    switch result {
+                    case .success(let data):
+                        XCTAssertEqual(data, networkObject)
+                        exp.fulfill()
+                    case .failure(_):
+                        break
+                    }
+                }
+            case .failure(_):
+                break
+            }
+        }
+        
+        wait(for: [exp], timeout: 3.0)
+    }
+    
     func mockNetwork(with result: Result<[WeatherData], AppError>) {
         (mockNetworkRepository as! MockNetworkRepository).result = result
     }
@@ -152,8 +204,8 @@ private extension WeatherData {
             return weatherData
         }
         
-        public static func emptyObjectWith(id: Int, cityName: String) -> WeatherData {
-            .init(weather: [], main: .init(temp: 0, feelsLike: 0, tempMin: 0, tempMax: 0, pressure: 0, humidity: 0), cod: 0, sys: .init(type: 0, id: 0, country: "", sunrise: 0, sunset: 0), coord: .init(lon: 0, lat: 0), base: "", visibility: 0, wind: .init(speed: 0, deg: 0), clouds: .init(all: 0), dt: 0, timezone: 0, id: id, name: cityName)
+        public static func emptyObjectWith(id: Int, cityName: String, dt: Int = 0) -> WeatherData {
+            .init(weather: [], main: .init(temp: 0, feelsLike: 0, tempMin: 0, tempMax: 0, pressure: 0, humidity: 0), cod: 0, sys: .init(type: 0, id: 0, country: "", sunrise: 0, sunset: 0), coord: .init(lon: 0, lat: 0), base: "", visibility: 0, wind: .init(speed: 0, deg: 0), clouds: .init(all: 0), dt: dt, timezone: 0, id: id, name: cityName)
         }
     
     }

@@ -18,6 +18,7 @@ protocol CitiesListViewDelegate: class {
 class CitiesListViewController: UIViewController {
     let cellIdentifier = "cell"
     let weatherDetailsIdentifier = "weatherDetails"
+    lazy var refreshControl = UIRefreshControl()
     var weatherDataList: [Domain.WeatherData] = []
     var presenter: CitiesListPresenter!
 
@@ -28,10 +29,21 @@ class CitiesListViewController: UIViewController {
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.refreshControl = refreshControl
+        refreshControl.addTarget(self, action: #selector(handleRefreshControl), for: .valueChanged)
+        
         ///#Add from DI container
         let useCase = DataLayer.UseCaseProvider().makeWeatherDataUseCase()
         presenter = CitiesListPresenter(delegate: self, useCase: useCase)
         presenter.loadLocalStorageCities()
+    }
+    
+    @objc func handleRefreshControl() {
+        presenter.updateAllWeatherData {
+            DispatchQueue.main.async { [weak self] in
+                self?.refreshControl.endRefreshing()
+            }
+        }
     }
 
     @IBAction func addBarButtonWasTapped(_ sender: UIBarButtonItem) {

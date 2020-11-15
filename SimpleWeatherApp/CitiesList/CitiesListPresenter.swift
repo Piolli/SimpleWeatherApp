@@ -17,15 +17,33 @@ class CitiesListPresenter {
         self.useCase = useCase
     }
     
-    func loadLocalStorageCities() {
+    func loadLocalStorageCities(_ completion: (() -> Void)? = nil) {
         useCase.localStorageWeather { (result) in
             DispatchQueue.main.async {
+                completion?()
                 switch result {
                 case .success(let citiesWithWeathers):
                     self.delegate.showCities(citiesWithWeathers)
                 case .failure(let error):
                     print("Error while loading local storage cities: \(error.localizedDescription)")
                 }
+            }
+        }
+    }
+    
+    func updateAllWeatherData(completion: @escaping () -> Void) {
+        useCase.updateAllWeatherData { [weak self] (result) in
+            guard let self = self else {
+                completion()
+                return
+            }
+            switch result {
+            case .success(_):
+                self.loadLocalStorageCities(completion)
+                print("All local weather data were updated")
+            case .failure(let error):
+                completion()
+                self.delegate.showError(error)
             }
         }
     }

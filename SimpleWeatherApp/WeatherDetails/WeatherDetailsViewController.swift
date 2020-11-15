@@ -18,7 +18,7 @@ class WeatherDetailsViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         cityNameLabel.text = weatherData.name
-        weatherDescriptionLabel.text = "Temp: \(weatherData.main.temp) °C\nMax temp: \(weatherData.main.tempMax) °C\nMin temp: \(weatherData.main.tempMin) °C"
+        weatherDescriptionLabel.text = "Temp: \(weatherData.main.temp) °C\nMax temp: \(weatherData.main.tempMax) °C\nMin temp: \(weatherData.main.tempMin) °C\nDatetime: \(Date(timeIntervalSince1970: TimeInterval(weatherData.dt)))"
         navigationItem.title = "Weather in \(weatherData.name)"
     }
 }
