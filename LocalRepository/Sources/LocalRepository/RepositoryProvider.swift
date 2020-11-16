@@ -13,7 +13,17 @@ public class RepositoryProvider: Domain.RepositoryProvider {
     
     let configuration: Realm.Configuration
     
-    public init(configuration: Realm.Configuration = Realm.Configuration.defaultConfiguration) {
+    public convenience init() {
+        if var directory: URL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.sanyakam.SimpleWeatherApp.SharedData") {
+            directory.appendPathComponent("db.realm", isDirectory: true)
+            let config = Realm.Configuration(fileURL: directory)
+            self.init(configuration: config)
+        } else {
+            self.init(configuration: Realm.Configuration.defaultConfiguration)
+        }
+    }
+    
+    public init(configuration: Realm.Configuration) {
         self.configuration = configuration
     }
     
