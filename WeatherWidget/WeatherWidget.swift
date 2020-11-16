@@ -33,7 +33,7 @@ struct Provider: TimelineProvider {
             var timeline: Timeline<SimpleEntry>
             switch result {
             case .success(let data):
-                let entry = SimpleEntry(date: date, weatherData: data)
+                let entry = SimpleEntry(date: date, weatherData: data.map { $0.asSimpleWeatherData() })
                 timeline = Timeline(entries: [entry], policy: .after(nextUpdateDate))
             case .failure(let error):
                 //use local weather data or placeholder (or show warning about network connection)
@@ -44,17 +44,59 @@ struct Provider: TimelineProvider {
     }
 }
 
+class SimpleWeatherData {
+    private let weatherData: Domain.WeatherData
+    
+    var cityName: String {
+        return weatherData.name
+    }
+    
+    var updateDateTime: String {
+        let date = Date(timeIntervalSince1970: TimeInterval(weatherData.dt))
+        let dateFormatter = DateFormatter()
+        if Calendar.current.isDateInToday(date) {
+            dateFormatter.dateFormat = "h:mm a"
+        } else {
+            dateFormatter.dateFormat = "MMM d, h:mm a"
+        }
+        return dateFormatter.string(from: date)
+    }
+    
+    var currentTemp: String {
+        return "\(weatherData.main.temp.rounded())°"
+    }
+    
+    var minTemp: String {
+        return "\(weatherData.main.tempMin.rounded())°"
+    }
+    
+    var maxTemp: String {
+        return "\(weatherData.main.tempMax.rounded())°"
+    }
+    
+    init(weatherData: Domain.WeatherData) {
+        self.weatherData = weatherData
+    }
+}
+
+extension SimpleWeatherData: Identifiable { }
+
 struct SimpleEntry: TimelineEntry {
     let date: Date
-    let weatherData: [Domain.WeatherData]
+    let weatherData: [SimpleWeatherData]
     
     public static func emptyObjectWith(date: Date, id: Int, cityName: String, dt: Int = 0) -> Self {
-        return SimpleEntry(date: date, weatherData: [.init(weather: [], main: .init(temp: 0, feelsLike: 0, tempMin: 0, tempMax: 0, pressure: 0, humidity: 0), cod: 0, sys: .init(type: 0, id: 0, country: "", sunrise: 0, sunset: 0), coord: .init(lon: 0, lat: 0), base: "", visibility: 0, wind: .init(speed: 0, deg: 0), clouds: .init(all: 0), dt: dt, timezone: 0, id: id, name: cityName)])
+        let weatherData = WeatherData.init(weather: [], main: .init(temp: 0, feelsLike: 0, tempMin: 0, tempMax: 0, pressure: 0, humidity: 0), cod: 0, sys: .init(type: 0, id: 0, country: "", sunrise: 0, sunset: 0), coord: .init(lon: 0, lat: 0), base: "", visibility: 0, wind: .init(speed: 0, deg: 0), clouds: .init(all: 0), dt: dt, timezone: 0, id: id, name: cityName).asSimpleWeatherData()
+        return SimpleEntry(date: date, weatherData: [weatherData])
     }
     
 }
 
-extension WeatherData: Identifiable { }
+extension WeatherData {
+    func asSimpleWeatherData() -> SimpleWeatherData {
+        return SimpleWeatherData(weatherData: self)
+    }
+}
 
 struct WeatherWidgetEntryView : View {
     var entry: Provider.Entry
@@ -62,10 +104,16 @@ struct WeatherWidgetEntryView : View {
     var body: some View {
         VStack {
             ForEach(entry.weatherData) { weatherData in
-                // Add last update datetime text
-                Text("\(weatherData.dt): \(weatherData.name)-\(weatherData.id): \(weatherData.main.temp)").font(.system(size: 16))
+                // Show only favorite WeatherData
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("\(weatherData.cityName) \(weatherData.currentTemp)").font(.title)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("L:\(weatherData.minTemp) H:\(weatherData.maxTemp)").font(.body)
+                        Text("Updated: \(weatherData.updateDateTime)").font(.caption2)
+                    }
+                }
             }
-        }
+        }.padding(.all)
     }
 }
 
