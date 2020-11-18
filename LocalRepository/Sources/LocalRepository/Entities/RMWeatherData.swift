@@ -11,6 +11,7 @@ import Domain
 
 class RMWeatherData: Object, DomainConvertible {
     let weather: List<RMWeather> = List()
+    @objc dynamic public var isFavorite: Bool = false
     @objc dynamic public var main: RMMain?
     @objc dynamic public var cod: Int = 0
     @objc dynamic public var sys: RMSys?
@@ -28,7 +29,8 @@ class RMWeatherData: Object, DomainConvertible {
         super.init()
     }
     
-    public init(main: RMMain? = nil, cod: Int = 0, sys: RMSys? = nil, coord: RMCoord? = nil, base: String = "", visibility: Int = 0, wind: RMWind? = nil, clouds: RMClouds? = nil, dt: Int = 0, id: Int = 0, timezone: Int = 0, name: String = "") {
+    public init(isFavorite: Bool = false, main: RMMain? = nil, cod: Int = 0, sys: RMSys? = nil, coord: RMCoord? = nil, base: String = "", visibility: Int = 0, wind: RMWind? = nil, clouds: RMClouds? = nil, dt: Int = 0, id: Int = 0, timezone: Int = 0, name: String = "") {
+        self.isFavorite = isFavorite
         self.main = main
         self.cod = cod
         self.sys = sys
@@ -49,7 +51,7 @@ class RMWeatherData: Object, DomainConvertible {
     
     func asDomain() -> WeatherData {
         let weathers = Array(weather.map {$0.asDomain()})
-        return WeatherData(weather: weathers, main: main!.asDomain(), cod: cod, sys: sys!.asDomain(), coord: coord!.asDomain(), base: base, visibility: visibility, wind: wind!.asDomain(), clouds: clouds!.asDomain(), dt: dt, timezone: timezone, id: id, name: name)
+        return WeatherData(isFavorite: isFavorite, weather: weathers, main: main!.asDomain(), cod: cod, sys: sys!.asDomain(), coord: coord!.asDomain(), base: base, visibility: visibility, wind: wind!.asDomain(), clouds: clouds!.asDomain(), dt: dt, timezone: timezone, id: id, name: name)
     }
 }
 
