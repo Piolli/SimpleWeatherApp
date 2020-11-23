@@ -9,8 +9,7 @@ import Foundation
 
 // MARK: - WeatherData
 public struct WeatherData: Codable, Equatable {
-    // untracked for JSON
-    public var isFavorite: Bool! = false
+    @DefaultValue.False public var isFavorited: Bool
     public let weather: [Weather]
     public let main: Main
     public let cod: Int
@@ -24,8 +23,7 @@ public struct WeatherData: Codable, Equatable {
     public let timezone, id: Int
     public let name: String
     
-    public init(isFavorite: Bool, weather: [Weather], main: Main, cod: Int, sys: Sys, coord: Coord, base: String, visibility: Int, wind: Wind, clouds: Clouds, dt: Int, timezone: Int, id: Int, name: String) {
-        self.isFavorite = isFavorite
+    public init(isFavorited: Bool, weather: [Weather], main: Main, cod: Int, sys: Sys, coord: Coord, base: String, visibility: Int, wind: Wind, clouds: Clouds, dt: Int, timezone: Int, id: Int, name: String) {
         self.weather = weather
         self.main = main
         self.cod = cod
@@ -39,6 +37,7 @@ public struct WeatherData: Codable, Equatable {
         self.timezone = timezone
         self.id = id
         self.name = name
+        self.isFavorited = isFavorited
     }
 }
 

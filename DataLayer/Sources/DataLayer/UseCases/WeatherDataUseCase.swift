@@ -40,6 +40,29 @@ public class WeatherDataUseCase: Domain.WeatherDataUseCase {
         }
     }
     
+    public func setFavorited(value: Bool, for weatherData: WeatherData, completion: @escaping (Result<Void, AppError>) -> Void) {
+        //set previous weather data to unfavorite
+        localStorageWeather { [weak self] (result) in
+            guard let self = self else {
+                completion(.failure(.unknown))
+                return
+            }
+            switch result {
+            case .success(let data):
+                for var wd in data {
+                    wd.isFavorited = false
+                    self.saveToLocalStorage(wd)
+                }
+            case .failure(let error):
+                completion(.failure(.localStorageWith(error)))
+            }
+        }
+        
+        var weatherData = weatherData
+        weatherData.isFavorited = value
+        localRepository.save(entity: weatherData, completion)
+    }
+    
     public func localStorageWeather(completion: @escaping (Result<[WeatherData], AppError>) -> Void) {
         localRepository.queryAll(completion)
     }

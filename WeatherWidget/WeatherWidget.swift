@@ -86,7 +86,7 @@ struct SimpleEntry: TimelineEntry {
     let weatherData: [SimpleWeatherData]
     
     public static func emptyObjectWith(date: Date, id: Int, cityName: String, dt: Int = 0) -> Self {
-        let weatherData = WeatherData.init(weather: [], main: .init(temp: 0, feelsLike: 0, tempMin: 0, tempMax: 0, pressure: 0, humidity: 0), cod: 0, sys: .init(type: 0, id: 0, country: "", sunrise: 0, sunset: 0), coord: .init(lon: 0, lat: 0), base: "", visibility: 0, wind: .init(speed: 0, deg: 0), clouds: .init(all: 0), dt: dt, timezone: 0, id: id, name: cityName).asSimpleWeatherData()
+        let weatherData = WeatherData.init(isFavorited: false, weather: [], main: .init(temp: 0, feelsLike: 0, tempMin: 0, tempMax: 0, pressure: 0, humidity: 0), cod: 0, sys: .init(type: 0, id: 0, country: "", sunrise: 0, sunset: 0), coord: .init(lon: 0, lat: 0), base: "", visibility: 0, wind: .init(speed: 0, deg: 0), clouds: .init(all: 0), dt: dt, timezone: 0, id: id, name: cityName).asSimpleWeatherData()
         return SimpleEntry(date: date, weatherData: [weatherData])
     }
     

@@ -15,4 +15,6 @@ public protocol WeatherDataUseCase {
     
     func updateAllWeatherData(completion: @escaping (Result<Void, AppError>) -> Void)
     
+    func setFavorited(value: Bool, for weatherData: WeatherData, completion: @escaping (Result<Void, AppError>) -> Void)
+    
 }
