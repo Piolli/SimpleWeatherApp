@@ -15,6 +15,8 @@ protocol CitiesListViewDelegate: class {
     func addWeatherData(_ weatherData: Domain.WeatherData)
 }
 
+
+
 class CitiesListViewController: UIViewController {
     let cellIdentifier = "cell"
     let weatherDetailsIdentifier = "weatherDetails"
@@ -26,7 +28,7 @@ class CitiesListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.register(UITableViewCell.self, forCellReuseIdentifier: cellIdentifier)
+        tableView.register(CityCellView.self, forCellReuseIdentifier: cellIdentifier)
         tableView.delegate = self
         tableView.dataSource = self
         tableView.refreshControl = refreshControl
@@ -68,7 +70,8 @@ class CitiesListViewController: UIViewController {
         if segue.identifier == weatherDetailsIdentifier {
             guard let viewController = segue.destination as? WeatherDetailsViewController, let indexPath = tableView.indexPathForSelectedRow else { return }
             let weatherData = weatherDataList[indexPath.row]
-            viewController.weatherData = weatherData
+            viewController.presenter = WeatherDetailsPresenter(view: viewController, useCase: presenter.useCase, weatherData: weatherData)
+            viewController.delegate = self
         }
     }
 }
@@ -77,10 +80,7 @@ class CitiesListViewController: UIViewController {
 extension CitiesListViewController: CitiesListViewDelegate {
     
     func showError(_ error: AppError) {
-        let dialog = UIAlertController(title: "Error", message: error.localizedDescription, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: "Ok", style: .cancel, handler: nil)
-        dialog.addAction(okAction)
-        present(dialog, animated: true, completion: nil)
+        self.show(error: error)
     }
     
     func showCities(_ cities: [WeatherData]) {
@@ -92,10 +92,17 @@ extension CitiesListViewController: CitiesListViewDelegate {
     func addWeatherData(_ weatherData: Domain.WeatherData) {
         weatherDataList.append(weatherData)
         tableView.beginUpdates()
-        tableView.insertRows(at: [IndexPath(row: weatherDataList.count-1, section: 0)], with: .left)
+        tableView.insertRows(at: [IndexPath(row: weatherDataList.count-1, section: 0)], with: .automatic)
         tableView.endUpdates()
     }
     
+}
+
+class CityCellView: UITableViewCell {
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        self.imageView?.frame.origin.x = self.frame.origin.x + 16
+    }
 }
 
 // MARK: - UITableViewDataSource
@@ -106,8 +113,10 @@ extension CitiesListViewController: UITableViewDataSource {
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
-        cell.textLabel?.text = "\(weatherDataList[indexPath.row].name) - \(weatherDataList[indexPath.row].id)"
+        let weatherData = weatherDataList[indexPath.row]
+        cell.textLabel?.text = "\(weatherData.name) - \(weatherData.id)"
         cell.accessoryType = .disclosureIndicator
+        cell.imageView?.image = Images.getStarImageFor(value: weatherData.isFavorited)
         return cell
     }
 }
@@ -116,6 +125,32 @@ extension CitiesListViewController: UITableViewDataSource {
 extension CitiesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: weatherDetailsIdentifier, sender: nil)
-        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let selectedIndexPath = tableView.indexPathForSelectedRow {
+            tableView.deselectRow(at: selectedIndexPath, animated: true)
+        }
+    }
+}
+
+extension CitiesListViewController: WeatherDetailsViewControllerDelegate {
+    func weatherDataWasSetFavorited(value: Bool) {
+        if let selectedIndexPath = tableView.indexPathForSelectedRow {
+            // unfavorite another data
+            var reloadingIndexPaths: [IndexPath] = [selectedIndexPath]
+            weatherDataList = weatherDataList.map { (weatherData) -> WeatherData in
+                var weatherData = weatherData
+                reloadingIndexPaths.append(.init(row: weatherDataList.firstIndex(of: weatherData)!, section: 0))
+                weatherData.isFavorited = false
+                return weatherData
+            }
+            weatherDataList[selectedIndexPath.row].isFavorited = value
+            tableView.beginUpdates()
+            tableView.reloadRows(at: reloadingIndexPaths, with: .automatic)
+            tableView.endUpdates()
+        }
+        
     }
 }

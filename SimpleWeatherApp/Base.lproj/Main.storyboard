@@ -82,7 +82,13 @@
                             <constraint firstItem="V4y-cD-v5m" firstAttribute="leading" secondItem="RSJ-LE-4J7" secondAttribute="leading" id="iNb-Un-UvI"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="Z6Q-GH-grC"/>
+                    <navigationItem key="navigationItem" id="Z6Q-GH-grC">
+                        <barButtonItem key="rightBarButtonItem" title="Item" image="star-line" id="AEq-gn-1Xi">
+                            <connections>
+                                <action selector="favoriteButtonWasTapped:" destination="nvB-Cg-3JT" id="RWW-gR-9zz"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="cityNameLabel" destination="wlN-pu-7AQ" id="bVy-9G-gnE"/>
                         <outlet property="weatherDescriptionLabel" destination="HST-4A-yF4" id="Vam-iv-SEP"/>
@@ -112,6 +118,7 @@
         </scene>
     </scenes>
     <resources>
+        <image name="star-line" width="24" height="24"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
         </systemColor>

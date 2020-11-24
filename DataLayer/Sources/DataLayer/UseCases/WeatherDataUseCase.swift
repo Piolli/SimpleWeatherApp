@@ -50,17 +50,18 @@ public class WeatherDataUseCase: Domain.WeatherDataUseCase {
             switch result {
             case .success(let data):
                 for var wd in data {
-                    wd.isFavorited = false
-                    self.saveToLocalStorage(wd)
+                    if wd.id == weatherData.id {
+                        wd.isFavorited = value
+                        self.saveToLocalStorage(wd, completion: completion)
+                    } else if wd.isFavorited  {
+                        wd.isFavorited = false
+                        self.saveToLocalStorage(wd)
+                    }
                 }
             case .failure(let error):
                 completion(.failure(.localStorageWith(error)))
             }
         }
-        
-        var weatherData = weatherData
-        weatherData.isFavorited = value
-        localRepository.save(entity: weatherData, completion)
     }
     
     public func localStorageWeather(completion: @escaping (Result<[WeatherData], AppError>) -> Void) {
@@ -87,7 +88,6 @@ public class WeatherDataUseCase: Domain.WeatherDataUseCase {
                 }
             case .failure(let error):
                 outputError = .localStorageWith(error)
-//                completion(.failure(.localStorageWith(error)))
             }
         }
         
@@ -108,23 +108,39 @@ public class WeatherDataUseCase: Domain.WeatherDataUseCase {
     
     private func fetchFromNetworkRepository(predicate: NSPredicate, input: [String: Any], cityName: String, _ completion: @escaping (Result<WeatherData, AppError>) -> Void) {
         networkRepository.query(with: predicate, variables: input) { [weak self] (result) in
+            guard let self = self else {
+                completion(.failure(.unknown))
+                return
+            }
             switch result {
             case .success(let weathers):
-                let weatherData = weathers.first!
+                var weatherData = weathers.first!
                 completion(.success(weatherData))
-                self?.saveToLocalStorage(weatherData)
+                // check if weather data exists
+                self.localRepository.query(with: predicate, variables: input) { (result) in
+                    switch result {
+                    case .success(let data):
+                        // use saved state because network weather data removes local state
+                        weatherData.isFavorited = data.first!.isFavorited
+                    case .failure(_):
+                        break
+                    }
+                    self.saveToLocalStorage(weatherData)
+                }
             case .failure(let error):
                 completion(.failure(error))
             }
         }
     }
     
-    private func saveToLocalStorage(_ weatherData: WeatherData) {
+    private func saveToLocalStorage(_ weatherData: WeatherData, completion: ((Result<Void, AppError>) -> Void)? = nil) {
         localRepository.save(entity: weatherData) { (result) in
             switch result {
             case .success():
+                completion?(.success(()))
                 print("WeatherData was saved to LocalStorage with id = \(weatherData.id) and dt: \(weatherData.dt)")
             case .failure(let error):
+                completion?(.failure(.localStorageWith(error)))
                 print("Error: WeatherData wasn't saved to LocalStorage with id = \(weatherData.id): \(error)")
             }
         }

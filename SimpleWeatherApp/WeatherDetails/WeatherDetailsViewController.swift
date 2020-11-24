@@ -8,17 +8,60 @@
 import UIKit
 import Domain
 
-class WeatherDetailsViewController: UIViewController {
+protocol WeatherDetailsViewDelegate: class {
+    func showError(_ error: AppError)
+    func setCityName(_ text: String)
+    func setNavigationItemTitle(_ text: String)
+    func setWeatherDescription(_ text: String)
+    func setFavoriteButtonImage(_ image: UIImage)
+}
 
+protocol WeatherDetailsPresenterProtocol: class {
+    func viewDidLoad()
+    func updateFavoriteValue(completion: @escaping (_ newValue: Bool) -> Void)
+}
+
+protocol WeatherDetailsViewControllerDelegate: class {
+    func weatherDataWasSetFavorited(value: Bool)
+}
+
+class WeatherDetailsViewController: UIViewController {
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var weatherDescriptionLabel: UILabel!
     
-    var weatherData: WeatherData!
+    weak var delegate: WeatherDetailsViewControllerDelegate?
+    var presenter: WeatherDetailsPresenterProtocol!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        cityNameLabel.text = weatherData.name
-        weatherDescriptionLabel.text = "Temp: \(weatherData.main.temp) °C\nMax temp: \(weatherData.main.tempMax) °C\nMin temp: \(weatherData.main.tempMin) °C\nDatetime: \(Date(timeIntervalSince1970: TimeInterval(weatherData.dt)))"
-        navigationItem.title = "Weather in \(weatherData.name)"
+        presenter.viewDidLoad()
+    }
+    
+    @IBAction func favoriteButtonWasTapped(_ sender: Any) {
+        presenter.updateFavoriteValue { [weak self] (newValue) in
+            self?.delegate?.weatherDataWasSetFavorited(value: newValue)
+        }
+    }
+}
+
+extension WeatherDetailsViewController: WeatherDetailsViewDelegate {
+    func showError(_ error: AppError) {
+        self.show(error: error)
+    }
+    
+    func setCityName(_ text: String) {
+        cityNameLabel.text = text
+    }
+    
+    func setNavigationItemTitle(_ text: String) {
+        navigationItem.title = text
+    }
+    
+    func setWeatherDescription(_ text: String) {
+        weatherDescriptionLabel.text = text
+    }
+    
+    func setFavoriteButtonImage(_ image: UIImage) {
+        navigationItem.rightBarButtonItem?.image = image
     }
 }

@@ -44,7 +44,7 @@ class RealmRepository<T: RealmRepresentable>: Repository<T> where T == T.RealmTy
     override func save(entity: T, _ completion: @escaping (Result<Void, AppError>) -> Void) {
         do {
             try realm.write {
-                realm.add(entity.asRealm(), update: .all)
+                realm.add(entity.asRealm(), update: .modified)
                 completion(.success(()))
             }
         } catch {
