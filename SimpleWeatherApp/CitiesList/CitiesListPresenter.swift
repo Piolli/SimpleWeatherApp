@@ -31,6 +31,10 @@ class CitiesListPresenter {
         }
     }
     
+    func remove(weatherData: WeatherData, completion: @escaping (Result<Void, AppError>) -> Void) {
+        useCase.remove(weatherData: weatherData, completion: completion)
+    }
+    
     func updateAllWeatherData(completion: @escaping () -> Void) {
         useCase.updateAllWeatherData { [weak self] (result) in
             guard let self = self else {

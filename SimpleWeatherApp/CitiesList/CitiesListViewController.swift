@@ -133,6 +133,26 @@ extension CitiesListViewController: UITableViewDelegate {
             tableView.deselectRow(at: selectedIndexPath, animated: true)
         }
     }
+    
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: "Remove") { [weak self] (action, view, comp)  in
+            guard let self = self else {
+                return
+            }
+            let weatherData = self.weatherDataList[indexPath.row]
+            self.presenter.remove(weatherData: weatherData, completion: { (result) in
+                switch result {
+                case .success(_):
+                    self.weatherDataList.remove(at: indexPath.row)
+                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
+                case .failure(let error):
+                    self.showError(error)
+                }
+            })
+        }
+        let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
+        return configuration
+    }
 }
 
 extension CitiesListViewController: WeatherDetailsViewControllerDelegate {

@@ -66,6 +66,18 @@ public class WeatherDataUseCase: Domain.WeatherDataUseCase {
         }
     }
     
+    public func remove(weatherData: WeatherData, completion: @escaping (Result<Void, AppError>) -> Void) {
+        localRepository.delete(entity: weatherData) { (result) in
+            switch result {
+            case .success(_):
+                WeatherDataUseCase.updateWidgetState()
+            case .failure(_):
+                break
+            }
+            completion(result)
+        }
+    }
+    
     public func localStorageWeather(completion: @escaping (Result<[WeatherData], AppError>) -> Void) {
         localRepository.queryAll(completion)
     }

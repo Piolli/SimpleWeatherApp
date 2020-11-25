@@ -211,6 +211,39 @@ final class DataLayerTests: XCTestCase {
         wait(for: [exp1], timeout: 3.0)
     }
     
+    func test_WeatherDataUseCase_remove() {
+        // save one sample object to local storage
+        let exp = expectation(description: "WeatherData was loaded")
+        var localObjects = [
+            WeatherData.TestData.emptyObjectWith(id: 0, cityName: "Krasnoyarsk"),
+            WeatherData.TestData.emptyObjectWith(id: 1, cityName: "Belgium"),
+            WeatherData.TestData.emptyObjectWith(id: 2, cityName: "NY"),
+        ]
+        localObjects.forEach { (weatherData) in
+            mockLocalRepository.save(entity: weatherData, {_ in})
+        }
+        
+        weatherDataUseCase.remove(weatherData: localObjects[1]) { (result) in
+            switch result {
+            case .success(_):
+                self.weatherDataUseCase.localStorageWeather { (result) in
+                    switch result {
+                    case .success(let data):
+                        localObjects.remove(at: 1)
+                        XCTAssertEqual(localObjects.sorted { $0.id < $1.id }, data.sorted { $0.id < $1.id })
+                        exp.fulfill()
+                    case .failure(_):
+                        XCTFail()
+                    }
+                }
+            case .failure(_):
+                XCTFail()
+            }
+        }
+        
+        wait(for: [exp], timeout: 3.0)
+    }
+    
     func mockNetwork(with result: Result<[WeatherData], AppError>) {
         (mockNetworkRepository as! MockNetworkRepository).result = result
     }
