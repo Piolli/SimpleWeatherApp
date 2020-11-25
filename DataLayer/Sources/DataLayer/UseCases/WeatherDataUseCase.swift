@@ -9,6 +9,7 @@ import Foundation
 import Domain
 import LocalRepository
 import NetworkRepository
+import WidgetKit
 
 public class WeatherDataUseCase: Domain.WeatherDataUseCase {
     
@@ -58,6 +59,7 @@ public class WeatherDataUseCase: Domain.WeatherDataUseCase {
                         self.saveToLocalStorage(wd)
                     }
                 }
+                WeatherDataUseCase.updateWidgetState()
             case .failure(let error):
                 completion(.failure(.localStorageWith(error)))
             }
@@ -92,7 +94,18 @@ public class WeatherDataUseCase: Domain.WeatherDataUseCase {
         }
         
         dispathGroup.notify(queue: DispatchQueue.main) {
-            completion(outputError == nil ? .success(()) : .failure(.localStorageWith(outputError!)))
+            if outputError == nil {
+                completion(.success(()))
+                WeatherDataUseCase.updateWidgetState()
+            } else {
+                completion(.failure(.localStorageWith(outputError!)))
+            }
+        }
+    }
+    
+    private static func updateWidgetState() {
+        if #available(iOS 14, *) {
+            WidgetCenter.shared.reloadAllTimelines()
         }
     }
     

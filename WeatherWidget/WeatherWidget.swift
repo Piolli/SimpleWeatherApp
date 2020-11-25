@@ -33,11 +33,22 @@ struct Provider: TimelineProvider {
             var timeline: Timeline<SimpleEntry>
             switch result {
             case .success(let data):
-                let entry = SimpleEntry(date: date, weatherData: data.map { $0.asSimpleWeatherData() })
+                let widgetData = data
+                    .filter { $0.isFavorited }
+                    .map { $0.asSimpleWeatherData() }
+                let entry = SimpleEntry(date: date, weatherData: widgetData)
                 timeline = Timeline(entries: [entry], policy: .after(nextUpdateDate))
             case .failure(let error):
+                var errorDescription: String
+                switch error {
+                case .localStorageIsEmpty:
+                    errorDescription = "Add new city in the app"
+                default:
+                    errorDescription = error.localizedDescription
+                }
                 //use local weather data or placeholder (or show warning about network connection)
-                timeline = Timeline<SimpleEntry>(entries: [SimpleEntry.emptyObjectWith(date: Date(), id: 1, cityName: error.localizedDescription)], policy: .after(nextUpdateDate))
+                let simpleEntry = SimpleEntry(errorDescription: errorDescription)
+                timeline = Timeline<SimpleEntry>(entries: [simpleEntry], policy: .after(nextUpdateDate))
             }
             completion(timeline)
         }
@@ -83,7 +94,18 @@ extension SimpleWeatherData: Identifiable { }
 
 struct SimpleEntry: TimelineEntry {
     let date: Date
+    var errorDescription: String? = nil
     let weatherData: [SimpleWeatherData]
+    
+    init(date: Date, weatherData: [SimpleWeatherData]) {
+        self.date = date
+        self.weatherData = weatherData
+    }
+    
+    init(errorDescription: String) {
+        self.init(date: Date(), weatherData: [])
+        self.errorDescription = errorDescription
+    }
     
     public static func emptyObjectWith(date: Date, id: Int, cityName: String, dt: Int = 0) -> Self {
         let weatherData = WeatherData.init(isFavorited: false, weather: [], main: .init(temp: 0, feelsLike: 0, tempMin: 0, tempMax: 0, pressure: 0, humidity: 0), cod: 0, sys: .init(type: 0, id: 0, country: "", sunrise: 0, sunset: 0), coord: .init(lon: 0, lat: 0), base: "", visibility: 0, wind: .init(speed: 0, deg: 0), clouds: .init(all: 0), dt: dt, timezone: 0, id: id, name: cityName).asSimpleWeatherData()
@@ -100,20 +122,24 @@ extension WeatherData {
 
 struct WeatherWidgetEntryView : View {
     var entry: Provider.Entry
+    
+    var weatherData: SimpleWeatherData? {
+        return entry.weatherData.first
+    }
 
+    @ViewBuilder
     var body: some View {
-        VStack {
-            ForEach(entry.weatherData) { weatherData in
-                // Show only favorite WeatherData
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("\(weatherData.cityName) \(weatherData.currentTemp)").font(.title)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("L:\(weatherData.minTemp) H:\(weatherData.maxTemp)").font(.body)
-                        Text("Updated: \(weatherData.updateDateTime)").font(.caption2)
-                    }
+        if let weatherData = weatherData {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("\(weatherData.cityName) \(weatherData.currentTemp)").font(.title)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("L:\(weatherData.minTemp) H:\(weatherData.maxTemp)").font(.body)
+                    Text("Updated: \(weatherData.updateDateTime)").font(.caption2)
                 }
-            }
-        }.padding(.all)
+            }.padding(.all)
+        } else {
+            Text("Set favorited city in the app")
+        }
     }
 }
 
@@ -125,8 +151,8 @@ struct WeatherWidget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             WeatherWidgetEntryView(entry: entry)
         }
-        .configurationDisplayName("My Widget")
-        .description("This is an example widget.")
+        .configurationDisplayName("Weather")
+        .description("See the current weather in a favorited city.")
     }
 }
 
