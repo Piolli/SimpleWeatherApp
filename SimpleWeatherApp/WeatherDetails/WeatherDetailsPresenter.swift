@@ -10,7 +10,7 @@ import Domain
 
 class WeatherDetailsPresenter: WeatherDetailsPresenterProtocol {
     private let useCase: WeatherDataUseCase
-    private let weatherData: WeatherData
+    private var weatherData: WeatherData
     unowned private let view: WeatherDetailsViewDelegate
     
     private var weatherDescription: String {
@@ -40,6 +40,7 @@ class WeatherDetailsPresenter: WeatherDetailsPresenterProtocol {
             switch result {
             case .success(_):
                 self?.view.setFavoriteButtonImage(Images.getStarImageFor(value: newValue))
+                self?.weatherData.isFavorited = newValue
                 completion(newValue)
             case .failure(let error):
                 self?.view.showError(error)
