@@ -13,6 +13,7 @@ protocol CitiesListViewDelegate: class {
     func showCities(_ cities: [WeatherData])
     func showError(_ error: AppError)
     func addWeatherData(_ weatherData: Domain.WeatherData)
+    func setRefreshing(value: Bool)
 }
 
 
@@ -40,12 +41,16 @@ class CitiesListViewController: UIViewController {
         presenter.loadLocalStorageCities()
     }
     
-    @objc func handleRefreshControl() {
-        presenter.updateAllWeatherData {
-            DispatchQueue.main.async { [weak self] in
-                self?.refreshControl.endRefreshing()
-            }
+    func setRefreshing(value: Bool) {
+        if value {
+            tableView.refreshControl!.beginRefreshing()
+        } else {
+            tableView.refreshControl!.endRefreshing()
         }
+    }
+    
+    @objc func handleRefreshControl() {
+        presenter.updateAllWeatherData()
     }
 
     @IBAction func addBarButtonWasTapped(_ sender: UIBarButtonItem) {
@@ -80,7 +85,9 @@ class CitiesListViewController: UIViewController {
 extension CitiesListViewController: CitiesListViewDelegate {
     
     func showError(_ error: AppError) {
-        self.show(error: error)
+        self.show(error: error) {
+            self.setRefreshing(value: false)
+        }
     }
     
     func showCities(_ cities: [WeatherData]) {

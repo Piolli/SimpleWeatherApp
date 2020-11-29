@@ -17,6 +17,23 @@ class CitiesListPresenter {
         self.useCase = useCase
     }
     
+    func updateAllWeatherData() {
+        useCase.updateAllWeatherData { [weak self] (result) in
+            guard let self = self else {
+                return
+            }
+            switch result {
+            case .success(_):
+                print("All local weather data were updated")
+                self.loadLocalStorageCities {
+                    self.delegate.setRefreshing(value: false)
+                }
+            case .failure(let error):
+                self.delegate.showError(error)
+            }
+        }
+    }
+    
     func loadLocalStorageCities(_ completion: (() -> Void)? = nil) {
         useCase.localStorageWeather { (result) in
             DispatchQueue.main.async {
@@ -30,28 +47,7 @@ class CitiesListPresenter {
             }
         }
     }
-    
-    func remove(weatherData: WeatherData, completion: @escaping (Result<Void, AppError>) -> Void) {
-        useCase.remove(weatherData: weatherData, completion: completion)
-    }
-    
-    func updateAllWeatherData(completion: @escaping () -> Void) {
-        useCase.updateAllWeatherData { [weak self] (result) in
-            guard let self = self else {
-                completion()
-                return
-            }
-            switch result {
-            case .success(_):
-                self.loadLocalStorageCities(completion)
-                print("All local weather data were updated")
-            case .failure(let error):
-                completion()
-                self.delegate.showError(error)
-            }
-        }
-    }
-    
+
     func loadCity(_ cityName: String) {
         useCase.weather(cityName: cityName) { [weak self] (result) in
             guard let self = self else {
@@ -68,4 +64,7 @@ class CitiesListPresenter {
         }
     }
     
+    func remove(weatherData: WeatherData, completion: @escaping (Result<Void, AppError>) -> Void) {
+        useCase.remove(weatherData: weatherData, completion: completion)
+    }
 }
