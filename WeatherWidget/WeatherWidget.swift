@@ -131,9 +131,19 @@ struct WeatherWidgetEntryView : View {
     var body: some View {
         if let weatherData = weatherData {
             VStack(alignment: .leading, spacing: 8) {
-                Text("\(weatherData.cityName) \(weatherData.currentTemp)").font(.title)
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("L:\(weatherData.minTemp) H:\(weatherData.maxTemp)").font(.body)
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("\(weatherData.cityName)")
+                        .font(.title)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.65)
+                    Text("\(weatherData.currentTemp)").frame(maxWidth: .infinity, alignment: .leading).font(.title2)
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("H:\(weatherData.maxTemp) L:\(weatherData.minTemp)")
+                        .minimumScaleFactor(0.5)
+                        .font(.body)
+                        .lineLimit(1)
                     Text("Updated: \(weatherData.updateDateTime)").font(.caption2)
                 }
             }.padding(.all)
@@ -158,7 +168,7 @@ struct WeatherWidget: Widget {
 
 struct WeatherWidget_Previews: PreviewProvider {
     static var previews: some View {
-        WeatherWidgetEntryView(entry: SimpleEntry.emptyObjectWith(date: Date(), id: 0, cityName: "Belgium"))
+        WeatherWidgetEntryView(entry: SimpleEntry.emptyObjectWith(date: Date(), id: 0, cityName: "BelgiumTestTestTestTestTest"))
             .previewContext(WidgetPreviewContext(family: .systemSmall))
     }
 }
