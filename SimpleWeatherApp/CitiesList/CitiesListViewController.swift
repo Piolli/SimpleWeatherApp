@@ -9,36 +9,32 @@ import UIKit
 import Domain
 import DataLayer
 
-protocol CitiesListViewDelegate: class {
-    func showCities(_ cities: [WeatherData])
+protocol CitiesListView: class {
     func showError(_ error: AppError)
-    func addWeatherData(_ weatherData: Domain.WeatherData)
     func setRefreshing(value: Bool)
+    func refreshCitiesView()
+    func showAddCityDialog()
+    func insertRow(at indexPath: IndexPath)
+    func removeRow(at indexPath: IndexPath)
 }
 
-
-
 class CitiesListViewController: UIViewController {
-    let cellIdentifier = "cell"
-    let weatherDetailsIdentifier = "weatherDetails"
-    lazy var refreshControl = UIRefreshControl()
-    var weatherDataList: [Domain.WeatherData] = []
-    var presenter: CitiesListPresenter!
+    
+    var presenter: CitiesListPresenterProtocol!
 
     @IBOutlet weak var tableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.register(CityCellView.self, forCellReuseIdentifier: cellIdentifier)
+        tableView.register(CityTableViewCell.self, forCellReuseIdentifier: CityTableViewCell.identifier)
         tableView.delegate = self
         tableView.dataSource = self
+        let refreshControl = UIRefreshControl()
         tableView.refreshControl = refreshControl
         refreshControl.addTarget(self, action: #selector(handleRefreshControl), for: .valueChanged)
         
-        ///#Add from DI container
-        let useCase = DataLayer.UseCaseProvider().makeWeatherDataUseCase()
-        presenter = CitiesListPresenter(delegate: self, useCase: useCase)
-        presenter.loadLocalStorageCities()
+        CitiesListConfigurator().configure(citiesListViewController: self)
+        presenter.viewDidLoad()
     }
     
     func setRefreshing(value: Bool) {
@@ -54,35 +50,19 @@ class CitiesListViewController: UIViewController {
     }
 
     @IBAction func addBarButtonWasTapped(_ sender: UIBarButtonItem) {
-        let dialog = UIAlertController(title: "Add city to list", message: nil, preferredStyle: .alert)
-        dialog.addTextField { (textField) in
-            textField.placeholder = "Enter city's name"
-        }
-        let loadAction = UIAlertAction(title: "Load", style: .default) { [unowned self] (action) in
-            let inputField = dialog.textFields![0]
-            guard let inputText = inputField.text else {
-                return
-            }
-            self.presenter.loadCity(inputText)
-        }
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
-        dialog.addAction(cancelAction)
-        dialog.addAction(loadAction)
-        present(dialog, animated: true, completion: nil)
+        presenter.addCityButtonWasPressed()
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == weatherDetailsIdentifier {
-            guard let viewController = segue.destination as? WeatherDetailsViewController, let indexPath = tableView.indexPathForSelectedRow else { return }
-            let weatherData = weatherDataList[indexPath.row]
-            viewController.presenter = WeatherDetailsPresenter(view: viewController, useCase: presenter.useCase, weatherData: weatherData)
-            viewController.delegate = self
-        }
+        presenter.router.prepare(for: segue, sender: sender)
     }
 }
 
 //MARK: - CitiesListViewDelegate
-extension CitiesListViewController: CitiesListViewDelegate {
+extension CitiesListViewController: CitiesListView {
+    func refreshCitiesView() {
+        tableView.reloadData()
+    }
     
     func showError(_ error: AppError) {
         self.show(error: error) {
@@ -90,40 +70,31 @@ extension CitiesListViewController: CitiesListViewDelegate {
         }
     }
     
-    func showCities(_ cities: [WeatherData]) {
-        weatherDataList.removeAll()
-        weatherDataList.append(contentsOf: cities)
-        tableView.reloadData()
+    func showAddCityDialog() {
+        let vc = UIAlertController.oneTextFieldDialog(title: "Add city", message: "City weather will load from server", actionTitle: "Add", textFieldPlaceholder: "Write city's name") { (cityName) in
+            self.presenter.addCity(cityName)
+        }
+        present(vc, animated: true, completion: nil)
     }
     
-    func addWeatherData(_ weatherData: Domain.WeatherData) {
-        weatherDataList.append(weatherData)
-        tableView.beginUpdates()
-        tableView.insertRows(at: [IndexPath(row: weatherDataList.count-1, section: 0)], with: .automatic)
-        tableView.endUpdates()
+    func insertRow(at indexPath: IndexPath) {
+        tableView.insertRows(at: [indexPath], with: .automatic)
     }
     
-}
-
-class CityCellView: UITableViewCell {
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        self.imageView?.frame.origin.x = self.frame.origin.x + 16
+    func removeRow(at indexPath: IndexPath) {
+        tableView.deleteRows(at: [indexPath], with: .automatic)
     }
 }
 
 // MARK: - UITableViewDataSource
 extension CitiesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return weatherDataList.count
+        return presenter.numberOfCities
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath)
-        let weatherData = weatherDataList[indexPath.row]
-        cell.textLabel?.text = "\(weatherData.name) - \(weatherData.id)"
-        cell.accessoryType = .disclosureIndicator
-        cell.imageView?.image = Images.getStarImageFor(value: weatherData.isFavorited)
+        let cell = tableView.dequeueReusableCell(withIdentifier: CityTableViewCell.identifier, for: indexPath) as! CityTableViewCell
+        presenter.configureCell(cell, at: indexPath)
         return cell
     }
 }
@@ -131,7 +102,7 @@ extension CitiesListViewController: UITableViewDataSource {
 // MARK: - UITableViewDelegate
 extension CitiesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        performSegue(withIdentifier: weatherDetailsIdentifier, sender: nil)
+        presenter.didSelectRow(at: indexPath)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -146,38 +117,9 @@ extension CitiesListViewController: UITableViewDelegate {
             guard let self = self else {
                 return
             }
-            let weatherData = self.weatherDataList[indexPath.row]
-            self.presenter.remove(weatherData: weatherData, completion: { (result) in
-                switch result {
-                case .success(_):
-                    self.weatherDataList.remove(at: indexPath.row)
-                    self.tableView.deleteRows(at: [indexPath], with: .automatic)
-                case .failure(let error):
-                    self.showError(error)
-                }
-            })
+            self.presenter.removeWeatherData(at: indexPath)
         }
         let configuration = UISwipeActionsConfiguration(actions: [deleteAction])
         return configuration
-    }
-}
-
-extension CitiesListViewController: WeatherDetailsViewControllerDelegate {
-    func weatherDataWasSetFavorited(value: Bool) {
-        if let selectedIndexPath = tableView.indexPathForSelectedRow {
-            // unfavorite another data
-            var reloadingIndexPaths: [IndexPath] = [selectedIndexPath]
-            weatherDataList = weatherDataList.map { (weatherData) -> WeatherData in
-                var weatherData = weatherData
-                reloadingIndexPaths.append(.init(row: weatherDataList.firstIndex(of: weatherData)!, section: 0))
-                weatherData.isFavorited = false
-                return weatherData
-            }
-            weatherDataList[selectedIndexPath.row].isFavorited = value
-            tableView.beginUpdates()
-            tableView.reloadRows(at: reloadingIndexPaths, with: .automatic)
-            tableView.endUpdates()
-        }
-        
     }
 }

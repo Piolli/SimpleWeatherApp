@@ -8,7 +8,7 @@
 import UIKit
 import Domain
 
-protocol WeatherDetailsViewDelegate: class {
+protocol WeatherDetailsView: class {
     func showError(_ error: AppError)
     func setCityName(_ text: String)
     func setNavigationItemTitle(_ text: String)
@@ -18,18 +18,18 @@ protocol WeatherDetailsViewDelegate: class {
 
 protocol WeatherDetailsPresenterProtocol: class {
     func viewDidLoad()
-    func updateFavoriteValue(completion: @escaping (_ newValue: Bool) -> Void)
+    func updateFavoriteValue()
 }
 
-protocol WeatherDetailsViewControllerDelegate: class {
-    func weatherDataWasSetFavorited(value: Bool)
+protocol WeatherDetailsViewDelegate: class {
+    func weatherDataWasSetFavorited(value: Bool, id: Int)
 }
 
 class WeatherDetailsViewController: UIViewController {
     @IBOutlet weak var cityNameLabel: UILabel!
     @IBOutlet weak var weatherDescriptionLabel: UILabel!
     
-    weak var delegate: WeatherDetailsViewControllerDelegate?
+    weak var delegate: WeatherDetailsViewDelegate?
     var presenter: WeatherDetailsPresenterProtocol!
     
     override func viewDidLoad() {
@@ -38,13 +38,11 @@ class WeatherDetailsViewController: UIViewController {
     }
     
     @IBAction func favoriteButtonWasTapped(_ sender: Any) {
-        presenter.updateFavoriteValue { [weak self] (newValue) in
-            self?.delegate?.weatherDataWasSetFavorited(value: newValue)
-        }
+        presenter.updateFavoriteValue()
     }
 }
 
-extension WeatherDetailsViewController: WeatherDetailsViewDelegate {
+extension WeatherDetailsViewController: WeatherDetailsView {
     func showError(_ error: AppError) {
         self.show(error: error)
     }
